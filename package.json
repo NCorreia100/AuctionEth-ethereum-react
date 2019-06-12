@@ -1,0 +1,38 @@
+{
+  "name": "auctioneth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server/index.js",
+  "scripts": {
+    "test": "mocha Eth/test/lottery.test.js",
+    "start": "node server/index.js",
+    "build-dev": "webpack -d --watch"
+  },
+  "author": "Nuno Correia",
+  "license": "none",
+  "dependencies": {
+    "express": "^4.16.4",
+    "react": "^16.7.0",
+    "react-bootstrap": "^0.32.4",
+    "react-dom": "^16.7.0",
+    "solc": "^0.5.1",
+    "truffle-hdwallet-provider": "0.0.5",
+    "web3": "^1.0.0-beta.26",
+    "web3-net": "^1.0.0-beta.36"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-transform-runtime": "^7.4.4",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/runtime": "^7.4.5",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-loader": "^8.0.4",
+    "babel-plugin-dynamic-import-node": "^2.2.0",
+    "ganache-cli": "^6.0.3",
+    "mocha": "^4.0.1",
+    "webpack": "^4.28.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-node-externals": "^1.7.2"
+  }
+}
