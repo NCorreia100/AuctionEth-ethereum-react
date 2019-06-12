@@ -1,12 +1,12 @@
 const path = require('path');
 const fs = require('fs');
-const SRC_DIR= path.join(__dirname,'contracts/Lottery.sol');
+const SRC_DIR= path.join(__dirname,'../contracts/Auction.sol');
 
 
 module.exports = {
     "language": "Solidity",
     "sources": {
-        "Lottery": {
+        "Factory": {
             "content": fs.readFileSync(SRC_DIR, "utf8")
         }
     },
