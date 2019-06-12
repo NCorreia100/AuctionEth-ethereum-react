@@ -11,10 +11,10 @@ contract AuctionFactory{
     }
 }
 contract Auction{
-    address payable public auctionOwner;
+    address payable public owner;
     address payable[] public bidders;
     uint[] public bids;
-    Product[1] public product; //for storing a single struct
+    mapping(address=>Product) public product; //for storing & retrieving struct
     struct Product{
         string name;
         string description;
@@ -22,8 +22,8 @@ contract Auction{
         uint dueBy;
         uint minimumWei;
     }
-    constructor(address payable owner,string memory name,string memory desc,uint qty,uint due,uint minWei) public{
-        auctionOwner = owner;
+    constructor(address payable creator,string memory name,string memory desc,uint qty,uint due,uint minWei) public{
+        owner = creator;
 
         Product memory p = Product({
             name : name,
@@ -32,19 +32,19 @@ contract Auction{
             dueBy: due,
             minimumWei : minWei
         });
-        product[0] = p;
+        product[owner] = p;
     }
     modifier dateCheck(){
-       Product storage p = product[0];
+       Product storage p = product[owner];
         require(now<p.dueBy,"Error: auction already closed");
         _;
     }
     modifier checkOwner(){
-        require(msg.sender==auctionOwner,"Error: Unautorized");
+        require(msg.sender==owner,"Error: Unautorized");
         _;
     }
     function submitBid() public payable dateCheck{
-        Product storage p = product[0];
+        Product storage p = product[owner];
         uint highestBid;
         //new bid has to be higher than the previous and minimum value
         if(bids.length>0) highestBid = bids[bids.length-1];
@@ -63,18 +63,18 @@ contract Auction{
         }
     }
     function editAuction(string memory desc, uint qty,uint due,uint minWei) public checkOwner{
-        Product storage p = product[0];
+        Product storage p = product[owner];
            p.description = desc;
            p.qtyRemaining = qty;
            p.dueBy = due;
            p.minimumWei = minWei;
     }
     function finalizeProductAuction() public payable checkOwner{
-        Product storage p = product[0];
+        Product storage p = product[owner];
         require(p.qtyRemaining>0,"Error: qunatity is already 0");
         require(p.dueBy<now,"Error: auction still ongoing");
         require(bidders.length>0,"Error no bids in record. Edit time to extend auction");
-        auctionOwner.transfer(bids[bids.length]);
+        owner.transfer(bids[bids.length]);
         bids.pop();
         bidders.pop();
         p.qtyRemaining--;
