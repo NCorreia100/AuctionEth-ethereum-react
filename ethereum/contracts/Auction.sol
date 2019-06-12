@@ -1,21 +1,20 @@
 pragma solidity ^0.5.1;
 
 contract AuctionFactory{
-       Auction[] public deployedAuctions;
-        //
-        function createAuction(string memory name,string memory desc,uint qty,uint due,uint minWei) public{
-            Auction newAuction = new Auction(msg.sender, name,desc,qty,due,minWei);
-            deployedAuctions.push(newAuction);
-        }
-        function getDeployedAuctions() public view returns (Auction[] memory){
-            return deployedAuctions;
-        }
+    Auction[] public deployedAuctions;
+    function createAuction(string memory name,string memory desc,uint qty,uint due,uint minWei) public{
+        Auction newAuction = new Auction(msg.sender, name,desc,qty,due,minWei);
+        deployedAuctions.push(newAuction);
+    }
+    function getDeployedAuctions() public view returns (Auction[] memory){
+    return deployedAuctions;
+    }
 }
 contract Auction{
     address payable public auctionOwner;
     address payable[] public bidders;
     uint[] public bids;
-    Product[1] public product; //storing the struct
+    Product[1] public product; //for storing a single struct
     struct Product{
         string name;
         string description;
