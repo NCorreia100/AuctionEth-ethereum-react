@@ -8,9 +8,9 @@ let { AuctionFactory, Auction } = JSON.parse(compiled, 1).contracts.Factory;
 
 module.exports = {
     factoryABI: AuctionFactory.abi,
-    factoryBytecode: AuctionFactory.evm.bytecode,
+    factoryBytecode: AuctionFactory.evm.bytecode.object,
     auctionABI: Auction.abi,
-    auctionBytecode: Auction.evm.bytecode
+    auctionBytecode: Auction.evm.bytecode.object
 };
 
 
