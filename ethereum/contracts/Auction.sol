@@ -23,6 +23,7 @@ contract Auction{
         uint minimumWei;
     }
     constructor(address payable creator,string memory name,string memory desc,uint qty,uint due,uint minWei) public{
+        require(due>now,'Error: auction closing must be in the future');
         owner = creator;
 
         Product memory p = Product({
@@ -34,7 +35,7 @@ contract Auction{
         });
         product[owner] = p;
     }
-    modifier dateCheck(){
+    modifier auctionOpen(){
        Product storage p = product[owner];
         require(now<p.dueBy,"Error: auction already closed");
         _;
@@ -43,7 +44,7 @@ contract Auction{
         require(msg.sender==owner,"Error: Unautorized");
         _;
     }
-    function submitBid() public payable dateCheck{
+    function submitBid() public payable auctionOpen{
         Product storage p = product[owner];
         uint highestBid;
         //new bid has to be higher than the previous and minimum value
@@ -63,6 +64,7 @@ contract Auction{
         }
     }
     function editAuction(string memory desc, uint qty,uint due,uint minWei) public checkOwner{
+        require(due>now,"Error: Not allowed to alert due date to a past date");
         Product storage p = product[owner];
            p.description = desc;
            p.qtyRemaining = qty;
