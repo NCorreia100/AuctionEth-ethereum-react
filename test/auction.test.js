@@ -2,7 +2,7 @@ const assert = require('assert');
 const ganache = require('ganache-cli');
 const Web3 = require('web3');
 
-const ganacheOptions = { gasLimit: '1000000000000000' }; 
+const ganacheOptions = { gasLimit: '1000000000000000' };
 
 const provider = ganache.provider(ganacheOptions);
 const web3 = new Web3(provider);
@@ -35,7 +35,7 @@ before(async () => {
 
 beforeEach(async () => {
     await factory.methods.createAuction(...Object.values(mockProduct))
-        .send({ from: accounts[0], gas: '5000000000',gasLimit: '500000000000000',gasPrice:'0' });
+        .send({ from: accounts[0], gas: '50000000' });
 
     let auctionAddress = await factory.methods.getDeployedAuctions().call();
     auction = await new web3.eth.Contract(auctionABI, auctionAddress.pop());
@@ -84,36 +84,76 @@ describe('Auction Smart Contract', () => {
         }
     });
 
-    it('allows any person to submit bid with an amount increasingly higher', async () => {       
-        
-        await auction.methods.submitBid().send({ from: accounts[1], value: '11' });
-        let bidsReceived = await auction.methods.bids().call();
-        
-        let bidders = await auction.methods.bidders().call();
-        assert.equals('11', bidsReceived[0]);
-        assert.equals(accounts[1], bidders[0]);        
+    it('allows any person to submit bid with an amount increasingly higher', async () => {
+
+        await auction.methods.submitBid().send({ from: accounts[1], value: '11', gas: '1000000' });
+        let bidsReceived = await auction.methods.bids(0).call();
+
+        let bidders = await auction.methods.bidders(0).call();
+        assert.equal('11', bidsReceived);
+        assert.equal(accounts[1], bidders);
 
         try {
-            await auction.methods.submitBid().send({ from: accounts[2], value: minWei });
+            await auction.methods.submitBid().send({ from: accounts[2], value: minWei, gas: '1000000' });
             assert(false);
         } catch (err) {
             assert(true);
         }
     });
 
-    it('quantity of bidders doesn\'t surpass products available and smaller bids are reimbursed per new bid',async()=>{
+    it('quantity of bidders doesn\'t surpass products available and smaller bids are reimbursed per new bid', async () => {
 
-        await auction.methods.submitBid().send({ from: accounts[2], value: web3.utils.toWei('0.3', 'ether') });
+        await auction.methods.submitBid().send({ from: accounts[2], value: web3.utils.toWei('0.3', 'ether'), gas: '1000000' });
         let curWei = await web3.eth.getBalance(accounts[2]);
-        
-        await auction.methods.submitBid().send({ from: accounts[1], value: web3.utils.toWei('0.4', 'ether') });
+
+        await auction.methods.submitBid().send({ from: accounts[1], value: web3.utils.toWei('0.4', 'ether'), gas: '1000000' });
         let finalWei = await web3.eth.getBalance(accounts[2]);
         assert(finalWei > curWei);
 
-        bidsReceived = await auction.methods.bids().call();        
-        bidders = await auction.methods.bidders().call();        
-        assert.equals(1, bidsReceived.length);
+        let bids = await auction.methods.getAllBids().call({ from: accounts[0] });
+        let bidders = await auction.methods.getAllBidders().call({ from: accounts[0] });
+        assert.equals(1, bids.length);
         assert.equals(1, bidders.length);
+    });
+
+    xit('auction owner can redeem etherium of highest bid. \nProduct quantity decreases and higuest bid is removed. \nNo bids are accepted when bidding time is over', async () => {
+        await auction.methods.submitBid().send({ from: accounts[2], value: web3.utils.toWei('0.3', 'ether'), gas: '1000000' });
+
+        //update time to expire auction
+        let updatedDetails = {
+            description: 'new description',
+            qtyRemaining: '1',
+            dueBy: Math.ceil(Date.now() / 1000),
+            minimumWei: web3.utils.toWei('0.2', 'ether')
+        }
+
+        await auction.methods.editAuction(...Object.values(updatedDetails)).send({ from: accounts[0], gas: '1000000' });
+
+        await console.log('success1')
+        //consume 1 sec
+        let bids = await auction.methods.getAllBids().call({ from: accounts[0] });
+        await console.log('success2')
+        await auction.methods.finalizeProductAuction().send({ from: accounts[0], gas: '1000000' });
+        await console.log('success3')
+
+        let balance = await auction.eth.getBalance();
+        await console.log('success4')
+        assert.equals(0, balance);
+
+        let bidders = await auction.methods.getAllBidders().call({ from: account[0] });
+        await console.log('success5')
+        assert.equals(0, bidders.length);
+
+        let storedProduct = await auction.methods.product(accounts[0]).call();
+        await console.log('success6')
+        assert.equals(0, storedProduct.qtyRemaining);
+
+        try {
+            await auction.methods.submitBid().send({ from: accounts[2], value: web3.utils.toWei('0.3', 'ether') });
+            assert(false);
+        } catch (err) {
+            assert(true);
+        }
     })
 });
 

@@ -35,6 +35,7 @@ contract Auction{
         });
         product[owner] = p;
     }
+     //modifiers and getters
     modifier auctionOpen(){
        Product storage p = product[owner];
         require(now<p.dueBy,"Error: auction already closed");
@@ -43,6 +44,12 @@ contract Auction{
     modifier checkOwner(){
         require(msg.sender==owner,"Error: Unautorized");
         _;
+    }
+    function getAllBids() public view returns(uint[] memory){
+        return bids;
+    }
+    function getAllBidders() public view returns(address payable[] memory){
+        return bidders;
     }
     function submitBid() public payable auctionOpen{
         Product storage p = product[owner];
@@ -80,5 +87,5 @@ contract Auction{
         bids.pop();
         bidders.pop();
         p.qtyRemaining--;
-    }
+    }   
 }
