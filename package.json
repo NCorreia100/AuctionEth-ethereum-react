@@ -28,7 +28,7 @@
     "babel-core": "^7.0.0-bridge.0",
     "babel-loader": "^8.0.4",
     "babel-plugin-dynamic-import-node": "^2.2.0",
-    "ganache-cli": "^6.0.3",
+    "ganache-cli": "^6.4.3",
     "mocha": "^4.0.1",
     "webpack": "^4.28.1",
     "webpack-cli": "^3.1.2",
